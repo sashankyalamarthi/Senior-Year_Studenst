@@ -28,11 +28,13 @@ jobs:
           Install-Module -Name SqlServer -Force -AllowClobber
           Import-Module SqlServer
 
-          # Install mssql-tools (includes sqlcmd) via Chocolatey
-          choco install mssql-tools -y
+          # Install sqlcmd via Chocolatey
+          choco install sqlcmd -y
 
-          # Add mssql-tools to PATH
-          $env:PATH += ";C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn"
+      # Step 2a: Verify sqlcmd installation (Optional)
+      - name: Verify sqlcmd installation
+        run: |
+          sqlcmd -?
 
       # Step 3: Create Database if not exists
       - name: Create Database if not exists
