@@ -12,7 +12,7 @@ jobs:
     runs-on: windows-latest
     env:
       # Hardcoded credentials for debugging (Replace with actual values)
-      SQL_SERVER: SASHANK           # e.g., sqlserver.example.com or 192.168.1.100
+      SQL_SERVER: 192.168.12.86,1433           # e.g., sqlserver.example.com or 192.168.1.100
       SQL_USER: User               # e.g., db_user
       SQL_PASSWORD: Sashank9#           # e.g., P@ssw0rd!
       DB_NAME: Senior-Year-Students
