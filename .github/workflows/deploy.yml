@@ -21,16 +21,18 @@ jobs:
         run: |
           Install-Module -Name SqlServer -Force -SkipPublisherCheck
           Import-Module SqlServer
-          
-      - name: Create Database if not exists
-       run: |
-         sqlcmd -S ${{ secrets.SQL_SERVER }} -U ${{ secrets.SQL_USER }} -P ${{ secrets.SQL_PASSWORD }} -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'Senior-Year-Students') BEGIN CREATE DATABASE Senior-Year-Students END"
 
-      # Step 3: Run the CreateTables.sql script
+      # Step 3: Create Database if not exists
+      - name: Create Database if not exists
+        run: |
+          sqlcmd -S ${{ secrets.SQL_SERVER }} -U ${{ secrets.SQL_USER }} -P ${{ secrets.SQL_PASSWORD }} -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'Senior-Year-Students') BEGIN CREATE DATABASE [Senior-Year-Students] END"
+
+      # Step 4: Run the CreateTables.sql script
       - name: Run CreateTables.sql script
         run: |
-          sqlcmd -S ${{ secrets.SQL_SERVER }} -U ${{ secrets.SQL_USER }} -P ${{ secrets.SQL_PASSWORD }} -i ./scripts/Students_Table.sql
+          sqlcmd -S ${{ secrets.SQL_SERVER }} -U ${{ secrets.SQL_USER }} -P ${{ secrets.SQL_PASSWORD }} -d Senior-Year-Students -i ./scripts/Students_Table.sql
+
       # Step 5: Run the Subject.sql script
       - name: Run Subject.sql script
         run: |
-          sqlcmd -S ${{ secrets.SQL_SERVER }} -U ${{ secrets.SQL_USER }} -P ${{ secrets.SQL_PASSWORD }} -i ./scripts/Subject.sql
+          sqlcmd -S ${{ secrets.SQL_SERVER }} -U ${{ secrets.SQL_USER }} -P ${{ secrets.SQL_PASSWORD }} -d Senior-Year-Students -i ./scripts/Subject.sql
