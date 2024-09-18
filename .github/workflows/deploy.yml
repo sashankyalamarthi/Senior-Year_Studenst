@@ -11,9 +11,10 @@ jobs:
   deploy:
     runs-on: windows-latest
     env:
-      SQL_SERVER: ${{ secrets.SQL_SERVER }}
-      SQL_USER: ${{ secrets.SQL_USER }}
-      SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+      # Hardcoded credentials for debugging (Replace with actual values)
+      SQL_SERVER: SASHANK           # e.g., sqlserver.example.com or 192.168.1.100
+      SQL_USER: User               # e.g., db_user
+      SQL_PASSWORD: Sashank9#           # e.g., P@ssw0rd!
       DB_NAME: Senior-Year-Students
 
     steps:
@@ -31,23 +32,34 @@ jobs:
           # Install sqlcmd via Chocolatey
           choco install sqlcmd -y
 
-      # Step 2a: Verify sqlcmd installation (Optional)
+      # Step 2a: Verify sqlcmd installation (Optional but recommended)
       - name: Verify sqlcmd installation
         run: |
           sqlcmd -?
+      
+      # Step 3: Debug Environment Variables (For Verification)
+      - name: Debug Environment Variables
+        run: |
+          Write-Host "SQL_SERVER is set to: $env:SQL_SERVER"
+          Write-Host "SQL_USER is set to: $env:SQL_USER"
+          Write-Host "DB_NAME is set to: $env:DB_NAME"
+        shell: pwsh
 
-      # Step 3: Create Database if not exists
+      # Step 4: Create Database if it does not exist
       - name: Create Database if not exists
+        shell: pwsh
         run: |
-          sqlcmd -S $env:SQL_SERVER -U $env:SQL_USER -P $env:SQL_PASSWORD -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = '$env:DB_NAME') BEGIN CREATE DATABASE [$env:DB_NAME] END"
+          sqlcmd -S $env:SQL_SERVER -U $env:SQL_USER -P '$env:SQL_PASSWORD' -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = '$env:DB_NAME') BEGIN CREATE DATABASE [$env:DB_NAME] END"
 
-      # Step 4: Run Students_Table.sql script
+      # Step 5: Run Students_Table.sql script
       - name: Run Students_Table.sql script
+        shell: pwsh
         run: |
-          sqlcmd -S $env:SQL_SERVER -U $env:SQL_USER -P $env:SQL_PASSWORD -d $env:DB_NAME -i ./scripts/Students_Table.sql
+          sqlcmd -S $env:SQL_SERVER -U $env:SQL_USER -P '$env:SQL_PASSWORD' -d $env:DB_NAME -i ./scripts/Students_Table.sql
 
-      # Step 5: Run Subject.sql script
+      # Step 6: Run Subject.sql script
       - name: Run Subject.sql script
+        shell: pwsh
         run: |
-          sqlcmd -S $env:SQL_SERVER -U $env:SQL_USER -P $env:SQL_PASSWORD -d $env:DB_NAME -i ./scripts/Subject.sql
+          sqlcmd -S $env:SQL_SERVER -U $env:SQL_USER -P '$env:SQL_PASSWORD' -d $env:DB_NAME -i ./scripts/Subject.sql
           # Check for errors
