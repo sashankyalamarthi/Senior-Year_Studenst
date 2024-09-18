@@ -1,5 +1,6 @@
 name: Deploy SQL Scripts to SQL Server
 
+# Triggers the workflow on push to main or development branches
 on:
   push:
     branches:
@@ -9,27 +10,42 @@ on:
 jobs:
   deploy:
     runs-on: windows-latest
+    env:
+      SQL_SERVER: ${{ secrets.SQL_SERVER }}
+      SQL_USER: ${{ secrets.SQL_USER }}
+      SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+      DB_NAME: Senior-Year-Students
 
     steps:
       # Step 1: Checkout the repository to get the SQL scripts
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # Step 2: Install the SQL Server tools like sqlcmd with AllowClobber to avoid conflicts
-      - name: Install SQL Server module and tools
+      # Step 2: Install SQL Server module and sqlcmd
+      - name: Install SQL Server module and sqlcmd
         run: |
+          # Install SqlServer PowerShell module
           Install-Module -Name SqlServer -Force -AllowClobber
           Import-Module SqlServer
+
+          # Install mssql-tools (includes sqlcmd) via Chocolatey
+          choco install mssql-tools -y
+
+          # Add mssql-tools to PATH
+          $env:PATH += ";C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn"
 
       # Step 3: Create Database if not exists
       - name: Create Database if not exists
         run: |
-          sqlcmd -S ${{ secrets.SQL_SERVER }} -U ${{ secrets.SQL_USER }} -P ${{ secrets.SQL_PASSWORD }} -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'Senior-Year-Students') BEGIN CREATE DATABASE [Senior-Year-Students] END"
+          sqlcmd -S $env:SQL_SERVER -U $env:SQL_USER -P $env:SQL_PASSWORD -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = '$env:DB_NAME') BEGIN CREATE DATABASE [$env:DB_NAME] END"
 
-      # Step 4: Run the CreateTables.sql script
-      - name: Run CreateTables.sql script
+      # Step 4: Run Students_Table.sql script
+      - name: Run Students_Table.sql script
         run: |
-          sqlcmd -S ${{ secrets.SQL_SERVER }} -U ${{ secrets.SQL_USER }} -P ${{ secrets.SQL_PASSWORD }} -d Senior-Year-Students -i ./scripts/Students_Table.sql
+          sqlcmd -S $env:SQL_SERVER -U $env:SQL_USER -P $env:SQL_PASSWORD -d $env:DB_NAME -i ./scripts/Students_Table.sql
 
-      # Step 5: Run the Subject.sql script
-     ​⬤
+      # Step 5: Run Subject.sql script
+      - name: Run Subject.sql script
+        run: |
+          sqlcmd -S $env:SQL_SERVER -U $env:SQL_USER -P $env:SQL_PASSWORD -d $env:DB_NAME -i ./scripts/Subject.sql
+          # Check for errors
