@@ -1,6 +1,5 @@
 name: Deploy SQL Scripts to SQL Server
 
-# Triggers the workflow on push to main or development branches
 on:
   push:
     branches:
@@ -16,10 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Step 2: Install the SQL Server tools like sqlcmd
+      # Step 2: Install the SQL Server tools like sqlcmd with AllowClobber to avoid conflicts
       - name: Install SQL Server module and tools
         run: |
-          Install-Module -Name SqlServer -Force -SkipPublisherCheck
+          Install-Module -Name SqlServer -Force -AllowClobber
           Import-Module SqlServer
 
       # Step 3: Create Database if not exists
@@ -33,6 +32,4 @@ jobs:
           sqlcmd -S ${{ secrets.SQL_SERVER }} -U ${{ secrets.SQL_USER }} -P ${{ secrets.SQL_PASSWORD }} -d Senior-Year-Students -i ./scripts/Students_Table.sql
 
       # Step 5: Run the Subject.sql script
-      - name: Run Subject.sql script
-        run: |
-          sqlcmd -S ${{ secrets.SQL_SERVER }} -U ${{ secrets.SQL_USER }} -P ${{ secrets.SQL_PASSWORD }} -d Senior-Year-Students -i ./scripts/Subject.sql
+     ​⬤
